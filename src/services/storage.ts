@@ -97,3 +97,47 @@ export async function reorderChannels(fromIndex: number, toIndex: number): Promi
     throw error;
   }
 }
+
+/**
+ * Export channels as JSON string
+ */
+export async function exportChannels(): Promise<string> {
+  const channels = await getChannels();
+  return JSON.stringify(channels, null, 2);
+}
+
+/**
+ * Import channels from JSON string (merges with existing)
+ */
+export async function importChannels(jsonString: string): Promise<Channel[]> {
+  try {
+    const importedChannels: Channel[] = JSON.parse(jsonString);
+    const existingChannels = await getChannels();
+
+    // Merge: add only channels that don't exist
+    const existingIds = new Set(existingChannels.map(c => c.channelId));
+    const newChannels = importedChannels.filter(c => !existingIds.has(c.channelId));
+
+    const mergedChannels = [...existingChannels, ...newChannels];
+    await AsyncStorage.setItem(CHANNELS_KEY, JSON.stringify(mergedChannels));
+
+    return mergedChannels;
+  } catch (error) {
+    console.error('Error importing channels:', error);
+    throw new Error('Invalid import file');
+  }
+}
+
+/**
+ * Replace all channels with imported ones
+ */
+export async function replaceChannels(jsonString: string): Promise<Channel[]> {
+  try {
+    const importedChannels: Channel[] = JSON.parse(jsonString);
+    await AsyncStorage.setItem(CHANNELS_KEY, JSON.stringify(importedChannels));
+    return importedChannels;
+  } catch (error) {
+    console.error('Error replacing channels:', error);
+    throw new Error('Invalid import file');
+  }
+}
