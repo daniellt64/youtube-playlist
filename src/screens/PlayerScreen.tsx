@@ -29,7 +29,7 @@ const isWeb = Platform.OS === 'web';
 const PLAYER_WIDTH = isWeb ? Math.min(480, SCREEN_WIDTH - 32) : SCREEN_WIDTH;
 const PLAYER_HEIGHT = (PLAYER_WIDTH * 9) / 16;
 
-export function PlayerScreen({ route }: Props) {
+export function PlayerScreen({ route, navigation }: Props) {
   const { playlist } = route.params;
   const [currentIndex, setCurrentIndex] = useState<number | null>(null);
   const [playing, setPlaying] = useState(false);
@@ -69,6 +69,14 @@ export function PlayerScreen({ route }: Props) {
 
   return (
     <View style={styles.container}>
+      {/* Back button */}
+      <TouchableOpacity
+        style={styles.backButton}
+        onPress={() => navigation.goBack()}
+      >
+        <Text style={styles.backButtonText}>← Back to Channels</Text>
+      </TouchableOpacity>
+
       {/* Player Section - only shows when a video is selected */}
       {currentVideo && (
         <View style={styles.playerSection}>
@@ -172,6 +180,17 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#0f0f0f',
+  },
+  backButton: {
+    padding: 16,
+    backgroundColor: '#1a1a1a',
+    borderBottomWidth: 1,
+    borderBottomColor: '#333',
+  },
+  backButtonText: {
+    color: '#ff0000',
+    fontSize: 16,
+    fontWeight: '500',
   },
   playerSection: {
     backgroundColor: '#000',
