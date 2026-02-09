@@ -57,10 +57,24 @@ export function WebYouTubePlayer({ videoId, width, height, play, onEnded }: WebY
           },
           events: {
             onStateChange: (event: any) => {
-              // 0 = ended
+              // 0 = ended, 1 = playing
               if (event.data === 0) {
                 console.log('Video ended, advancing...');
                 onEndedRef.current();
+              }
+              // Set up Media Session for lock screen controls (limited iOS support)
+              if (event.data === 1 && 'mediaSession' in navigator) {
+                try {
+                  navigator.mediaSession.metadata = new MediaMetadata({
+                    title: 'YouTube Playlist',
+                    artist: 'Playing video',
+                  });
+                  navigator.mediaSession.setActionHandler('nexttrack', () => {
+                    onEndedRef.current();
+                  });
+                } catch (e) {
+                  console.log('Media Session not supported');
+                }
               }
             },
           },
